@@ -5,6 +5,7 @@ import (
 
 	"net/http"
 
+	"jomy.dev/CI/auth"
 	"jomy.dev/CI/db"
 	"jomy.dev/CI/requests"
 )
@@ -15,7 +16,9 @@ func main() {
 	// Retrieve requests
 	http.HandleFunc("/requests", requests.RequestsHandler)
 	// Attempt to start a request
-	// http.HandleFunc("/request-start", nil)
+	http.HandleFunc("/request-start", auth.AuthMiddleware(requests.StartHandler))
+	// Finish a request
+	http.HandleFunc("/request-finish", auth.AuthMiddleware(requests.FinishHandler))
 
 	err := db.SetupDatabase()
 	if err != nil {

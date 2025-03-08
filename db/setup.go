@@ -51,12 +51,19 @@ func SetupDatabase() error {
 		status integer NOT NULL,
 		requested string NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		requestedBy string NOT NULL,
-		statusDate string NOT NULL DEFAULT CURRENT_TIMESTAMP
+		statusDate string NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		startedBy string NULL
 	);
 
 	CREATE TABLE IF NOT EXISTS par_Status (
 		id int NOT NULL,
 		name string NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS Tokens (
+		token string NOT NULL PRIMARY KEY,
+		-- platforms allowed to access
+		platform string NOT NULL
 	);
 	`
 
@@ -72,6 +79,7 @@ func SetupDatabase() error {
 		return err
 	}
 	defer rows.Close()
+
 	var dbVersion int = 0
 	if rows.Next() {
 		err = rows.Scan(&dbVersion)

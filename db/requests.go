@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"time"
@@ -93,12 +94,35 @@ type PlatformBuildRequest struct {
 	Id       int    `json:"id"`
 	Repo     string `json:"repo"`
 	Revision string `json:"revision"`
+	Status   Status `json:"status"`
+	Platform string `json:"platform"`
+}
+
+func LoadPlatformBuildRequest(rows *sql.Rows, req *PlatformBuildRequest) error {
+	if req == nil {
+		return errors.New("Request struct is nil")
+	}
+	return rows.Scan(&req.Id, &req.Repo, &req.Revision, &req.Status, &req.Platform)
+}
+
+func LoadPlatformBuildRequests(rows *sql.Rows) ([]PlatformBuildRequest, error) {
+	var req PlatformBuildRequest
+	var reqs []PlatformBuildRequest
+	var err error
+	for rows.Next() {
+		err = LoadPlatformBuildRequest(rows, &req)
+		if err != nil {
+			return nil, err
+		}
+		reqs = append(reqs, req)
+	}
+	return reqs, nil
 }
 
 // Get all open requests for a specific platform
 func GetOpenRequests(platform string) ([]PlatformBuildRequest, error) {
 	sql := `
-	SELECT id, repo, revision
+	SELECT id, repo, revision, status, platform
 	FROM BuildRequest
 	WHERE status = 1
 	  AND platform = ?
@@ -109,24 +133,40 @@ func GetOpenRequests(platform string) ([]PlatformBuildRequest, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
-	var id int
-	var repo string
-	var rev string
 	var reqs []PlatformBuildRequest
-	for rows.Next() {
-		err = rows.Scan(&id, &repo, &rev)
-		if err != nil {
-			return nil, err
-		}
-		reqs = append(reqs, PlatformBuildRequest{
-			Id:       id,
-			Repo:     repo,
-			Revision: rev,
-		})
+	reqs, err = LoadPlatformBuildRequests(rows)
+	if err != nil {
+		return nil, err
 	}
 
 	return reqs, nil
+}
+
+func GetRequestById(id int) (*PlatformBuildRequest, error) {
+	sql := `
+	SELECT id, repo, revision, status, platform
+	FROM BuildRequest
+	WHERE id = ?;
+	`
+
+	rows, err := db.Query(sql, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var req PlatformBuildRequest
+	if !rows.Next() {
+		return nil, nil // request does not exist
+	}
+	err = LoadPlatformBuildRequest(rows, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &req, nil
 }
 
 type BuildRequestStatus struct {
@@ -150,6 +190,7 @@ func GetAllRequests() ([]BuildRequestStatus, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	timeFmt := "2006-01-02 15:04:05"
 	var repo string
@@ -184,4 +225,55 @@ func GetAllRequests() ([]BuildRequestStatus, error) {
 	}
 
 	return reqs, nil
+}
+
+type Status int
+
+const (
+	StatusRequested = 1
+	StatusStarted   = 2
+	StatusFinished  = 3
+)
+
+func SetStatus(requestId int, status Status, token *string) error {
+	var res sql.Result
+	var err error
+	var sql string
+
+	if status == StatusStarted {
+		sql = `
+		UPDATE BuildRequest
+		SET status = ?,
+				startedBy = ?,
+				statusDate = CURRENT_TIMESTAMP
+		WHERE id = ?
+		`
+		if token == nil {
+			return errors.New("Token shouldn't be nil for status Started")
+		}
+		res, err = db.Exec(sql, status, requestId, token)
+	} else {
+		sql = `
+		UPDATE BuildRequest
+		SET status = ?,
+				statusDate = CURRENT_TIMESTAMP
+		WHERE id = ?
+		`
+		res, err = db.Exec(sql, status, requestId)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	i, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if i != 1 {
+		return errors.New("No rows updated")
+	}
+
+	return nil
 }

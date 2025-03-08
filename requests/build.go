@@ -19,7 +19,7 @@ func BuildRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 	json_data, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		http.Error(w, "Couldn't read request", http.StatusInternalServerError)
 		return
 	}
@@ -27,7 +27,7 @@ func BuildRequestHandler(w http.ResponseWriter, r *http.Request) {
 	var data db.BuildRequest
 	err = json.Unmarshal(json_data, &data)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		http.Error(w, "Invalid JSON: "+err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -36,7 +36,7 @@ func BuildRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = db.AddRequest(data)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		http.Error(w, "Error queuing request", http.StatusInternalServerError)
 		return
 	}

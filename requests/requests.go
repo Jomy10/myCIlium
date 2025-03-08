@@ -53,7 +53,7 @@ type postResult struct {
 func handlePost(w http.ResponseWriter, r *http.Request) {
 	json_data, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		http.Error(w, "Couldn't read request", http.StatusInternalServerError)
 		return
 	}
@@ -63,14 +63,14 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 
 	reqs, err := db.GetOpenRequests(req.platform)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		http.Error(w, "Couldn't retrieve requests", http.StatusInternalServerError)
 		return
 	}
 
 	reqsJson, err := json.Marshal(postResult{Requests: reqs})
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		http.Error(w, "Couldn't marshal response", http.StatusInternalServerError)
 		return
 	}
@@ -83,7 +83,7 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 
 	reqs, err := db.GetAllRequests()
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		http.Error(w, "Failed to get requests", http.StatusInternalServerError)
 		return
 	}
@@ -109,14 +109,14 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 		</html>
 		`)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		http.Error(w, "Failed creating template", http.StatusInternalServerError)
 		return
 	}
 
 	err = t.Execute(w, reqs)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		http.Error(w, "Failed executing template", http.StatusInternalServerError)
 		return
 	}
