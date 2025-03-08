@@ -66,9 +66,14 @@ func (key *BuildRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type PlatformId struct {
+	Id       int64  `json:"requestId"`
+	Platform string `json:"platform"`
+}
+
 // Add request to database, everyone with the right to read request can then
 // access /requests endpoint to poll requests and start them with /request-start
-func AddRequest(req BuildRequest) error {
+func AddRequest(req BuildRequest) ([]PlatformId, error) {
 	// TODO: all in one statement
 	sqlStr := `
 	INSERT INTO BuildRequest (repo, revision, platform, status, requestedBy)
@@ -77,16 +82,27 @@ func AddRequest(req BuildRequest) error {
 
 	stmt, err := db.Prepare(sqlStr)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	var i int64
+	var res sql.Result
+	var ret []PlatformId
 	for _, platform := range req.platforms {
-		_, err = stmt.Exec(req.repo, req.rev, platform, req.requestor)
+		res, err = stmt.Exec(req.repo, req.rev, platform, req.requestor)
 		if err != nil {
-			return err
+			return nil, err
 		}
+		i, err = res.LastInsertId()
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, PlatformId{
+			Id:       i,
+			Platform: platform,
+		})
 	}
 
-	return nil
+	return ret, nil
 }
 
 // Request for a specific platform

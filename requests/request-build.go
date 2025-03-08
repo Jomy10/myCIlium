@@ -11,6 +11,10 @@ import (
 	"jomy.dev/CI/db"
 )
 
+type response struct {
+	Ids []db.PlatformId `json:"ids"`
+}
+
 func BuildRequestHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Expected POST", http.StatusMethodNotAllowed)
@@ -34,10 +38,21 @@ func BuildRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("New BuildRequest", data)
 
-	err = db.AddRequest(data)
+	ids, err := db.AddRequest(data)
 	if err != nil {
 		log.Error(err)
 		http.Error(w, "Error queuing request", http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusCreated)
+
+	idsJson, err := json.Marshal(response{Ids: ids})
+	if err != nil {
+		log.Error(err)
+		w.Write([]byte("{\"error\": \"InternalError: couldn't marshal json, but record was created\"}"))
+		return
+	}
+
+	w.Write(idsJson)
 }
