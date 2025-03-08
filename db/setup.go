@@ -1,22 +1,17 @@
 package db
 
 import (
-	"context"
 	"database/sql"
-	"log"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	_ "github.com/mattn/go-sqlite3"
 	sqldblogger "github.com/simukti/sqldb-logger"
+	"github.com/simukti/sqldb-logger/logadapter/logrusadapter"
 )
 
 var db *sql.DB
-
-type DatabaseLogger struct{}
-
-func (logger *DatabaseLogger) Log(ctx context.Context, level sqldblogger.Level, msg string, data map[string]interface{}) {
-	log.Printf("[%s:%s] %s", ctx, level, msg)
-}
 
 func SetupDatabase() error {
 	dsn := "./data.db"
@@ -27,8 +22,10 @@ func SetupDatabase() error {
 	db = _db
 
 	// Enable logging
-	loggerAdapter := DatabaseLogger{}
-	db = sqldblogger.OpenDriver(dsn, db.Driver(), &loggerAdapter,
+	logrus := log.New()
+	logrus.Level = log.TraceLevel
+	logrus.Formatter = &log.TextFormatter{}
+	db = sqldblogger.OpenDriver(dsn, db.Driver(), logrusadapter.New(logrus),
 		sqldblogger.WithSQLQueryAsMessage(true),
 		sqldblogger.WithMinimumLevel(sqldblogger.LevelTrace),
 		sqldblogger.WithPreparerLevel(sqldblogger.LevelTrace),

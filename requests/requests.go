@@ -5,7 +5,9 @@ import (
 	"errors"
 	"html/template"
 	"io"
-	"log"
+
+	log "github.com/sirupsen/logrus"
+
 	"net/http"
 
 	"jomy.dev/CI/db"

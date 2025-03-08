@@ -3,7 +3,9 @@ package requests
 import (
 	"encoding/json"
 	"io"
-	"log"
+
+	log "github.com/sirupsen/logrus"
+
 	"net/http"
 
 	"jomy.dev/CI/db"
