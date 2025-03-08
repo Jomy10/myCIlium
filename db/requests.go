@@ -3,11 +3,10 @@ package db
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"time"
 )
 
-// Specifies a request to build `repo` at `rev` for the specified `platforms`
+// Specifies a request to build `repo` at `rev` for the specified `rlatforms`
 type BuildRequest struct {
 	repo string
 	// If emptry -> master branch
@@ -75,8 +74,6 @@ func AddRequest(req BuildRequest) error {
 	VALUES (?, ?, ?, 1, ?);
 	`
 
-	log.Println(sqlStr)
-
 	stmt, err := db.Prepare(sqlStr)
 	if err != nil {
 		return err
@@ -93,6 +90,7 @@ func AddRequest(req BuildRequest) error {
 
 // Request for a specific platform
 type PlatformBuildRequest struct {
+	Id       int    `json:"id"`
 	Repo     string `json:"repo"`
 	Revision string `json:"revision"`
 }
@@ -100,7 +98,7 @@ type PlatformBuildRequest struct {
 // Get all open requests for a specific platform
 func GetOpenRequests(platform string) ([]PlatformBuildRequest, error) {
 	sql := `
-	SELECT repo, revision
+	SELECT id, repo, revision
 	FROM BuildRequest
 	WHERE status = 1
 	  AND platform = ?
@@ -112,15 +110,17 @@ func GetOpenRequests(platform string) ([]PlatformBuildRequest, error) {
 		return nil, err
 	}
 
+	var id int
 	var repo string
 	var rev string
 	var reqs []PlatformBuildRequest
 	for rows.Next() {
-		err = rows.Scan(&repo, &rev)
+		err = rows.Scan(&id, &repo, &rev)
 		if err != nil {
 			return nil, err
 		}
 		reqs = append(reqs, PlatformBuildRequest{
+			Id:       id,
 			Repo:     repo,
 			Revision: rev,
 		})
@@ -145,8 +145,6 @@ func GetAllRequests() ([]BuildRequestStatus, error) {
 	INNER JOIN par_Status pStatus on pStatus.id = BuildRequest.status
 	ORDER BY requested DESC;
 	`
-
-	log.Println(sql)
 
 	rows, err := db.Query(sql)
 	if err != nil {

@@ -60,6 +60,11 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(json_data, &req)
 
 	reqs, err := db.GetOpenRequests(req.platform)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Couldn't retrieve requests", http.StatusInternalServerError)
+		return
+	}
 
 	reqsJson, err := json.Marshal(postResult{Requests: reqs})
 	if err != nil {

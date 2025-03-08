@@ -34,6 +34,7 @@ func BuildRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = db.AddRequest(data)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Error queuing request", http.StatusInternalServerError)
 		return
 	}
