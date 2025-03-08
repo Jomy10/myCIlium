@@ -251,7 +251,7 @@ func SetStatus(requestId int, status Status, token *string) error {
 		if token == nil {
 			return errors.New("Token shouldn't be nil for status Started")
 		}
-		res, err = db.Exec(sql, status, requestId, token)
+		res, err = db.Exec(sql, status, token, requestId)
 	} else {
 		sql = `
 		UPDATE BuildRequest

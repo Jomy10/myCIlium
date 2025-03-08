@@ -3,9 +3,9 @@ package requests
 import (
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
+	"jomy.dev/CI/db"
 )
 
-func FinishHandler(w http.ResponseWriter, r *http.Request, platform *string, token string) {
-	log.Fatal("todo")
+func FinishHandler(w http.ResponseWriter, r *http.Request, allowedPlatform *string, token string) {
+	HandleStatusChange(w, r, allowedPlatform, token, db.StatusFinished)
 }
