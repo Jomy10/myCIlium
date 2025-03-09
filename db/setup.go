@@ -60,10 +60,11 @@ func SetupDatabase() error {
 		name string NOT NULL
 	);
 
-	CREATE TABLE IF NOT EXISTS Tokens (
+	CREATE TABLE IF NOT EXISTS Token (
 		token string NOT NULL PRIMARY KEY,
 		-- platforms allowed to access
-		platform string NOT NULL
+		platform string,
+		right string NOT NULL
 	);
 	`
 

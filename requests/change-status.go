@@ -50,7 +50,7 @@ func NewExecutingCache() Executing {
 
 var ExecutingLock Executing = NewExecutingCache()
 
-func HandleStatusChange(w http.ResponseWriter, r *http.Request, allowedPlatform *string, token string, status db.Status) {
+func HandleStatusChange(w http.ResponseWriter, r *http.Request, allowedPlatform *string, token *string, status db.Status) {
 	if allowedPlatform == nil {
 		http.Error(w, "Bearer is not authorized for any platforms", http.StatusUnauthorized)
 		return
@@ -119,7 +119,7 @@ func HandleStatusChange(w http.ResponseWriter, r *http.Request, allowedPlatform 
 		}
 	}
 
-	err = db.SetStatus(*req.requestId, status, &token)
+	err = db.SetStatus(*req.requestId, status, token)
 	if err != nil {
 		log.Error(err)
 		http.Error(w, fmt.Sprint("Couldn't change status"), http.StatusInternalServerError)

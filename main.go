@@ -12,13 +12,13 @@ import (
 
 func main() {
 	// Request for building
-	http.HandleFunc("/request-build", requests.BuildRequestHandler)
+	http.HandleFunc("/request-build", auth.AuthCreateMiddleware(requests.BuildRequestHandler))
 	// Retrieve requests
 	http.HandleFunc("/requests", requests.RequestsHandler)
 	// Attempt to start a request
-	http.HandleFunc("/request-start", auth.AuthMiddleware(requests.StartHandler))
+	http.HandleFunc("/request-start", auth.AuthPlatformsMiddleware(requests.StartHandler))
 	// Finish a request
-	http.HandleFunc("/request-finish", auth.AuthMiddleware(requests.FinishHandler))
+	http.HandleFunc("/request-finish", auth.AuthPlatformsMiddleware(requests.FinishHandler))
 
 	err := db.SetupDatabase()
 	if err != nil {
