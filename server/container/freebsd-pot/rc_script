@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# PROVIDE: mycilium-orchestrator
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name=mycilium-orchestrator
+rcvar=mycilium_enable
+stop_cmd=mycilium_stop
+
+load_rc_config $name
+
+: ${mycilium_enable:="YES"}
+
+pidfile="/var/run/site_${name}.pid"
+procname=/usr/sbin/daemon
+command=$procname
+command_args="--change-dir \
+  --sighup \
+  --output-file /var/log/${name} \
+  -P ${pidfile} \
+  --restart \
+  --title ${name} \
+  --syslog-tag service_${name} \
+  /usr/local/bin/pot start ${name}"
+
+mycilium_stop() {
+  kill -2 "$(cat $pidfile)"
+  pot stop -p $name
+}
+
+run_rc_command "$1"
