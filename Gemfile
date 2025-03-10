@@ -4,7 +4,6 @@ source "https://rubygems.org"
 
 group :test do
   gem "webmock"
-  gem "net-ping"
+  gem "colorize"
+  gem "sqlite3"
 end
-
-gem "sqlite3", "~> 2.6"

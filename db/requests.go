@@ -136,16 +136,31 @@ func LoadPlatformBuildRequests(rows *sql.Rows) ([]PlatformBuildRequest, error) {
 }
 
 // Get all open requests for a specific platform
-func GetOpenRequests(platform string) ([]PlatformBuildRequest, error) {
+func GetRequests(platform *string, status *Status) ([]PlatformBuildRequest, error) {
 	sql := `
 	SELECT id, repo, revision, status, platform
 	FROM BuildRequest
-	WHERE status = 1
-	  AND platform = ?
-	ORDER BY requested ASC;
 	`
 
-	rows, err := db.Query(sql, platform)
+	var queryParams []any
+
+	if status != nil {
+		sql += "\nWHERE status = ?"
+		queryParams = append(queryParams, *status)
+	}
+
+	if platform != nil {
+		if len(queryParams) > 0 {
+			sql += "\n  AND platform = ?"
+		} else {
+			sql += "\nWHERE platform = ?"
+		}
+		queryParams = append(queryParams, *platform)
+	}
+
+	sql += "ORDER BY requested ASC;"
+
+	rows, err := db.Query(sql, queryParams...)
 	if err != nil {
 		return nil, err
 	}
@@ -250,6 +265,19 @@ const (
 	StatusStarted   = 2
 	StatusFinished  = 3
 )
+
+func ParseStatus(status string) (Status, bool) {
+	switch status {
+	case "requested":
+		return StatusRequested, true
+	case "started":
+		return StatusStarted, true
+	case "finished":
+		return StatusFinished, true
+	default:
+		return -1, false
+	}
+}
 
 func SetStatus(requestId int, status Status, token *string) error {
 	var res sql.Result

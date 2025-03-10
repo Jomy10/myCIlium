@@ -1,5 +1,7 @@
-require 'net/ping'
+require 'net/http'
+require 'uri'
 require 'sqlite3'
+require 'colorize'
 
 $tests = []
 
@@ -27,7 +29,7 @@ class Tester
   end
 
   def str
-    str = "#{@name}: #{@failed.size} failed, #{@succeeded.size} succeeded"
+    str = "#{@name.blue}: #{"#{@failed.size} failed".red}, #{"#{@succeeded.size} succeeded".green}"
     for failed in @failed
       str << "\nfailed: #{failed}"
     end
@@ -35,7 +37,22 @@ class Tester
   end
 end
 
-pid = spawn("go run .")
+continue = false
+begin
+  uri = URI(HOST)
+  http = Net::HTTP::new(uri.host, uri.port)
+  req = Net::HTTP::Get.new(uri.request_uri)
+  resp = http.request(req)
+rescue Errno::ECONNREFUSED
+  continue = true
+end
+
+if !continue
+  puts "Server already running on port 8080, stop it first"
+  return
+end
+
+pid = spawn("go run .", pgroup: true)
 
 # Wait for server to start
 while true
@@ -86,7 +103,8 @@ begin
 rescue => e
   p e
   puts "closing connection"
-  Process.kill("INT", pid)
+  Process.kill("-TERM", pid)
+  Process.wait(pid)
   return
 end
 
@@ -113,7 +131,8 @@ begin
   end
 ensure
   puts "closing connection"
-  Process.kill("INT", pid)
+  Process.kill("-TERM", pid)
+  Process.wait(pid)
 end
 
 for res in res

@@ -3,6 +3,7 @@ package requests
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"html/template"
 	"io"
 
@@ -25,7 +26,8 @@ func RequestsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type postRequest struct {
-	platform string
+	platform *string
+	status   *string
 }
 
 func (req *postRequest) UnmarshalJSON(data []byte) error {
@@ -37,7 +39,9 @@ func (req *postRequest) UnmarshalJSON(data []byte) error {
 	for k, v := range vals {
 		switch k {
 		case "platform":
-			req.platform = v
+			req.platform = &v
+		case "status":
+			req.status = &v
 		default:
 			return errors.New("Invalid key " + k)
 		}
@@ -60,8 +64,26 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 
 	var req postRequest
 	err = json.Unmarshal(json_data, &req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	reqs, err := db.GetOpenRequests(req.platform)
+	var status *db.Status
+	if req.status == nil {
+		status = nil
+	} else {
+		var ok bool
+		var temp_status db.Status
+		temp_status, ok = db.ParseStatus(*req.status)
+		status = &temp_status
+		if !ok {
+			http.Error(w, fmt.Sprintf("Invalid status '%s'", *req.status), http.StatusBadRequest)
+			return
+		}
+	}
+
+	reqs, err := db.GetRequests(req.platform, status)
 	if err != nil {
 		log.Error(err)
 		http.Error(w, "Couldn't retrieve requests", http.StatusInternalServerError)
