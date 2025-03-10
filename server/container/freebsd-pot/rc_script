@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# PROVIDE: mycilium-orchestrator
+# PROVIDE: mycilium_orchestrator
 # REQUIRE: LOGIN
 # KEYWORD: shutdown
 
 . /etc/rc.subr
 
-name=mycilium-orchestrator
+name=mycilium_orchestrator
 rcvar=mycilium_enable
 stop_cmd=mycilium_stop
 

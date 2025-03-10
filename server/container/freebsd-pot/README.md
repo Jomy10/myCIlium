@@ -1,4 +1,6 @@
-Run mycilium inside of a pot
+Run mycilium inside of a pot.
+
+An rc script is also present if you need it.
 
 ## Building
 
