@@ -4,7 +4,7 @@
     organizes tasks for other computers to pick up
   </p>
   ❰
-  <a href="/server/tests">examples</a>
+  <a href="/server/test">examples</a>
   |
   <a href="/server/main.go">endpoints</a>
   ❱

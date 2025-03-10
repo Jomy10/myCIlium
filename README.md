@@ -46,3 +46,4 @@
 ## In this repository
 
 - [server: server implementation "myCIlium orchestrator"](/server)
+- [spec: specification of the yaml format to be used for specifying what a host machine must do](/spec)
