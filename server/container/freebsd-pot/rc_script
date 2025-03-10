@@ -28,7 +28,7 @@ command_args="--change-dir \
 
 mycilium_stop() {
   kill -2 "$(cat $pidfile)"
-  pot stop -p $name
+  /usr/local/bin/pot stop -p $name
 }
 
 run_rc_command "$1"
