@@ -166,7 +166,7 @@ func GetRequests(platform *string, status *Status) ([]PlatformBuildRequest, erro
 	}
 	defer rows.Close()
 
-	var reqs []PlatformBuildRequest
+	var reqs []PlatformBuildRequest = []PlatformBuildRequest{}
 	reqs, err = LoadPlatformBuildRequests(rows)
 	if err != nil {
 		return nil, err
