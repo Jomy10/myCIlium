@@ -1,0 +1,4 @@
+import ConsoleKit
+
+func runInit() {
+}
