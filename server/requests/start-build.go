@@ -3,7 +3,7 @@ package requests
 import (
 	"net/http"
 
-	"jomy.dev/CI/db"
+	"jomy.dev/mycilium/server/db"
 )
 
 // Returns HTTP Conflict if the request is already building or built

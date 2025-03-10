@@ -6,7 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"jomy.dev/CI/db"
+	"jomy.dev/mycilium/server/db"
 )
 
 func getToken(w http.ResponseWriter, r *http.Request) *string {

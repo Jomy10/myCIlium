@@ -8,7 +8,7 @@ import (
 
 	"net/http"
 
-	"jomy.dev/CI/db"
+	"jomy.dev/mycilium/server/db"
 )
 
 type response struct {

@@ -1,13 +1,15 @@
 <div align="center">
-  <h1 style="font-weight: normal">MY<b>CI</b>LIUM ORCHESTRATOR</h1>
+  <h1 style="font-weight: normal">MY<b>CI</b>LIUM</h1>
   <p>
-    organizes tasks for other computers to pick up
+    distribute tasks to host machines for CI purposes
   </p>
+  <!--
   ❰
   <a href="/tests">examples</a>
   |
   <a href="/main.go">endpoints</a>
   ❱
+  -->
 </div><br/>
 
 ## How it works
@@ -29,8 +31,6 @@
    Orchestrator Server -->> macOS Host Machine: ok, start building
    ```
 
-
-
 3. The host machine clones the repo and starts doing the steps specified in the configuration.
 
 4. When finished, it notifies the orchestrator and will do any post-finish steps specified (like uploading artifacts)
@@ -43,13 +43,6 @@
    macOS Host Machine -->> GitHub: e.g. upload artifacts to latest release
    ```
 
+## In this repository
 
-
-
-
-## Testing
-
-```sh
-bundler install
-ruby test.rb
-```
+- [server: server implementation "myCIlium orchestrator"](/server)

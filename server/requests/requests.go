@@ -11,7 +11,7 @@ import (
 
 	"net/http"
 
-	"jomy.dev/CI/db"
+	"jomy.dev/mycilium/server/db"
 )
 
 func RequestsHandler(w http.ResponseWriter, r *http.Request) {

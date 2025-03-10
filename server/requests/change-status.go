@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"jomy.dev/CI/db"
+	"jomy.dev/mycilium/server/db"
 )
 
 type RequestIdBody struct {
