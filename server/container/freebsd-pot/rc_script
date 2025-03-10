@@ -24,7 +24,7 @@ command_args="--change-dir \
   --restart \
   --title ${name} \
   --syslog-tag service_${name} \
-  /usr/local/bin/pot start ${name}"
+  /usr/local/bin/pot start mycilium-orchestrator"
 
 mycilium_stop() {
   kill -2 "$(cat $pidfile)"
